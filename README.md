@@ -73,3 +73,86 @@ Para executar os testes em qualquer uma das branches, certifiquem-se de que est�
 Durante a aula, exploraremos como utilizar a Inteligência Artificial (Copilot/ChatGPT/Gemini) para gerar a estrutura destes ficheiros Pytest rapidamente. O foco do QA é **pensar nos cenários (Análise)**; a codificação (Automação) pode ser agilizada com o uso de Prompts assertivos!
 
 Bom estudo e bons testes! 🐛🔨
+
+---
+
+## 🔍 Revisão com a Skill `prune-tests`
+
+Esta branch (`chore/prune-tests`) aplica a skill **`prune-tests`** (salva em
+`~/.config/opencode/skills/prune-tests/SKILL.md`) para auditar e limpar testes
+frágeis ou tautológicos. Abaixo, os conceitos que ela ensina.
+
+### Modo de operação: Audit vs Cleanup
+
+A skill separa **o que pedem** de **o que se faz**:
+
+* **Audit** (pedidos como *revisar*, *analisar*, *encontrar*): é somente
+  leitura. O resultado é um relatório de disposições — nada é apagado.
+* **Cleanup** (pedidos como *podar*, *apagar*, *reescrever*): autoriza as
+  edições no escopo aprovado. Invocar a skill sozinha **não** converte uma
+  auditoria em limpeza.
+
+O **escopo** fica fixo (um diff, um PR, uma pasta, a suíte inteira) e toda
+decisão é tomada **por teste**, nunca por arquivo. Um arquivo só sai depois
+que todos os seus testes têm disposição.
+
+### A barra comportamental (6 critérios)
+
+Um teste só sobrevive se passar nos 6 itens — falhar em 1 = recomendar `DELETE`:
+
+1. Prova um comportamento exato vindo de **requisito aprovado**, bug, regra ou
+   exemplo trabalhado (**fonte independente**).
+2. Detecta uma falha **visível ao usuário ou ao chamador**.
+3. O resultado esperado é **independente da implementação**.
+4. Observa pelo **contrato público** (interface estável).
+5. Sobrevive a **refatores internos** e mudanças de copy/layout incidental.
+6. Usa o **menor seam estável** que dá confiança, sem duplicar cobertura
+   próxima (domain → application → component → E2E, na camada certa).
+
+### O que a skill manda podar
+
+* **Tautologias** — o esperado é derivado do próprio cálculo de produção
+  (ex.: `assert total == valor * 1.1` se a função faz a mesma conta). Passa
+  por construção; o esperado precisa poder discordar da implementação.
+* **Change detectors** — falham quando o *código* muda, sem apontar
+  comportamento errado: scans de fonte (`grep "import x"`), contagens de
+  elementos/exports, snapshots de markup/estrutura, asserções sobre
+  colaboradores privados, duplicatas cujo único valor é notar mudança.
+* **Geometria e aparência** — dimensões, ratios, estilos computados, contagem
+  de linhas montadas são evidência visual, não comportamento. Screenshot só
+  entra se o projeto adotou regressão visual como requisito.
+* **Copy (texto)** — asserção de prosa exata só quando a palavra em si é
+  requisito; caso contrário, valide papel, estado, navegação ou *reason code*.
+* **Focus/disabled** — mantenha só quando o estado **é** o contrato de
+  interação (foco no primeiro campo inválido, Save habilitado após edição).
+
+### Disposições
+
+| Disposição | Quando |
+|---|---|
+| `DELETE` | Viola a política e nenhum comportamento fica desprotegido. **É o padrão.** |
+| `REWRITE` | O teste é inaceitável, mas contém comportamento que passa na barra com justificativa forte. Exceção, não meio-termo. |
+| `KEEP` | Suspeito, mas prova comportamento aceitável e passa na barra sem mudar. |
+
+`KEEP` e `REWRITE` exigem **justificativa escrita para os 6 itens** da barra.
+Faltando qualquer um, o conselho vira `DELETE`. Ao reescrever, guarda-se
+apenas setup/ação/asserções necessárias — não se preserva o tamanho, número
+de asserções ou formato do teste antigo.
+
+### Validação e relatório
+
+No cleanup: rodar o menor comando de teste primeiro e depois toda a
+validação do repositório; limpar suporte morto (imports, fixtures, helpers);
+nunca mudar produção só para preservar um teste; inspecionar o diff final.
+O relatório lista `DELETE`/`REWRITE`/`KEEP` com caminho e motivo, a
+justificativa completa dos sobreviventes, os comandos executados e qualquer
+conflito de política — e declara explicitamente quando não existiu rewrite
+aceitável.
+
+### Resultado nesta branch
+
+3 `DELETE` aplicados (duplicata do `ValueError` de saque, teste de isolamento
+de fixture que não exercitava a função pública e teste de imutabilidade sem
+requisito que o aprovasse), `REWRITE` nenhum, 32 casos `KEEP`, suporte morto
+removido (`import copy` órfão) e suíte validada: **74 passed** (−3, exatos
+nos removidos).

@@ -1,35 +1,94 @@
 ANÁLISE DE CENÁRIOS - VALIDAÇÃO DE SAQUE
 
-Preencha este documento antes de completar os testes automatizados.
- Derive os cenários dos critérios de aceite em
- src/tech/angelofdiasg/qabank/operacoes/requisito_atividade_saque.txt.
+Derivada dos critérios de aceite em
+src/tech/angelofdiasg/qabank/operacoes/requisito_atividade_saque.txt.
+
+Partições de equivalência
+-------------------------
+P0: estrutura ausente/incompleta  -> ValueError "Dados do saque inválidos"
+P1: tipo != corrente e != poupanca -> Recusa "Tipo de conta inválido"
+P2: valor <= 0                     -> Recusa "Valor do saque deve ser maior que zero"
+P3: valor > saldo                  -> Recusa "Saldo insuficiente"
+P4: total_sacado_hoje + valor > limite -> Recusa "Limite diário de saque excedido"
+P5: todas as regras satisfeitas    -> Aprovado "Saque autorizado"
+
+Limites diários (critério 5): corrente = 2000, poupanca = 1000.
+Ordem das regras (critério 6): tipo -> valor -> saldo -> limite diário.
 
 Caminho feliz
 -------------
-Cenário:
-Entrada:
-Resultado esperado:
+Cenário: Saque válido em conta corrente com saldo e limite suficientes.
+Entrada: {"valor": 300, "conta": {"tipo": "corrente", "saldo": 1200, "total_sacado_hoje": 400}}
+Resultado esperado: {"status": "Aprovado", "motivo": "Saque autorizado", "saldo_restante": 900}
 
 Limites e partições válidas
 ---------------------------
-Cenário:
-Entrada:
-Resultado esperado:
+Cenário: Corrente exatamente no limite diário (total_sacado + valor == 2000).
+Entrada: {"valor": 500, "conta": {"tipo": "corrente", "saldo": 5000, "total_sacado_hoje": 1500}}
+Resultado esperado: {"status": "Aprovado", "motivo": "Saque autorizado", "saldo_restante": 4500}
+
+Cenário: Corrente um real acima do limite diário (2001 > 2000).
+Entrada: {"valor": 501, "conta": {"tipo": "corrente", "saldo": 5000, "total_sacado_hoje": 1500}}
+Resultado esperado: {"status": "Recusado", "motivo": "Limite diário de saque excedido", "saldo_restante": 5000}
+
+Cenário: Poupança exatamente no limite diário (total_sacado + valor == 1000).
+Entrada: {"valor": 300, "conta": {"tipo": "poupanca", "saldo": 5000, "total_sacado_hoje": 700}}
+Resultado esperado: {"status": "Aprovado", "motivo": "Saque autorizado", "saldo_restante": 4700}
+
+Cenário: Poupança um real acima do limite diário (1001 > 1000).
+Entrada: {"valor": 301, "conta": {"tipo": "poupanca", "saldo": 5000, "total_sacado_hoje": 700}}
+Resultado esperado: {"status": "Recusado", "motivo": "Limite diário de saque excedido", "saldo_restante": 5000}
+
+Cenário: Valor do saque exatamente igual ao saldo (limite inferior do saldo suficiente).
+Entrada: {"valor": 1000, "conta": {"tipo": "corrente", "saldo": 1000, "total_sacado_hoje": 0}}
+Resultado esperado: {"status": "Aprovado", "motivo": "Saque autorizado", "saldo_restante": 0}
+
+Cenário: Primeiro real acima do saldo.
+Entrada: {"valor": 1001, "conta": {"tipo": "corrente", "saldo": 1000, "total_sacado_hoje": 0}}
+Resultado esperado: {"status": "Recusado", "motivo": "Saldo insuficiente", "saldo_restante": 1000}
 
 Partições inválidas e exceções
 ------------------------------
-Cenário:
-Entrada:
-Resultado esperado:
+Cenário: Entrada não é dicionário (None).
+Entrada: None
+Resultado esperado: ValueError "Dados do saque inválidos"
+
+Cenário: Dicionário sem "valor" ou sem "conta".
+Entrada: {"conta": {"tipo": "corrente", "saldo": 1200, "total_sacado_hoje": 400}}
+Resultado esperado: ValueError "Dados do saque inválidos"
+
+Cenário: Conta incompleta (falta "total_sacado_hoje").
+Entrada: {"valor": 300, "conta": {"tipo": "corrente", "saldo": 1200}}
+Resultado esperado: ValueError "Dados do saque inválidos"
+
+Cenário: Tipo de conta desconhecido ("investimento").
+Entrada: {"valor": 100, "conta": {"tipo": "investimento", "saldo": 1200, "total_sacado_hoje": 0}}
+Resultado esperado: {"status": "Recusado", "motivo": "Tipo de conta inválido", "saldo_restante": 1200}
+
+Cenário: Valor do saque zero.
+Entrada: {"valor": 0, "conta": {"tipo": "corrente", "saldo": 1200, "total_sacado_hoje": 0}}
+Resultado esperado: {"status": "Recusado", "motivo": "Valor do saque deve ser maior que zero", "saldo_restante": 1200}
+
+Cenário: Valor do saque negativo.
+Entrada: {"valor": -50, "conta": {"tipo": "corrente", "saldo": 1200, "total_sacado_hoje": 0}}
+Resultado esperado: {"status": "Recusado", "motivo": "Valor do saque deve ser maior que zero", "saldo_restante": 1200}
 
 Prioridade entre regras
 -----------------------
-Cenário:
-Entrada:
-Resultado esperado:
+Cenário: Tipo inválido E valor negativo (tipo tem prioridade).
+Entrada: {"valor": -10, "conta": {"tipo": "carteira", "saldo": 500, "total_sacado_hoje": 0}}
+Resultado esperado: {"status": "Recusado", "motivo": "Tipo de conta inválido", "saldo_restante": 500}
+
+Cenário: Valor negativo E saldo insuficiente (valor tem prioridade sobre saldo).
+Entrada: {"valor": -10, "conta": {"tipo": "corrente", "saldo": 0, "total_sacado_hoje": 0}}
+Resultado esperado: {"status": "Recusado", "motivo": "Valor do saque deve ser maior que zero", "saldo_restante": 0}
+
+Cenário: Saldo insuficiente E limite diário excedido (saldo tem prioridade sobre limite).
+Entrada: {"valor": 3000, "conta": {"tipo": "corrente", "saldo": 100, "total_sacado_hoje": 1900}}
+Resultado esperado: {"status": "Recusado", "motivo": "Saldo insuficiente", "saldo_restante": 100}
 
 Integridade dos dados de entrada
 --------------------------------
-Cenário:
-Entrada:
-Resultado esperado:
+Cenário: A função não altera o dicionário recebido (nem em aprovação nem em recusa).
+Entrada: {"valor": 300, "conta": {"tipo": "corrente", "saldo": 1200, "total_sacado_hoje": 400}}
+Resultado esperado: o dicionário de entrada permanece igual ao original após a chamada.
