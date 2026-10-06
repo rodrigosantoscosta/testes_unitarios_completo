@@ -1,0 +1,44 @@
+Cenários de Teste - Função calcular_desconto
+
+Aplicando Análise de Valor Limite e Partição de Equivalência:
+
+[Cenários de Caminho Feliz / Limites]
+Cenário 1: Valor negativo (Exceção)
+
+Entrada: -10
+Esperado: ValueError
+
+Cenário 2: Zero (Limite inferior sem desconto)
+
+Entrada: 0
+Esperado: 0
+
+Cenário 3: Exatamente 100 (Limite superior sem desconto)
+
+Entrada: 100
+Esperado: 100
+
+Cenário 4: Exatamente 101 (Limite inferior 10% desconto)
+
+Entrada: 101
+Esperado: 90.9
+
+Cenário 5: Valor médio 10% desconto (Equivalência)
+
+Entrada: 300
+Esperado: 270
+
+Cenário 6: Exatamente 500 (Limite superior 10% desconto)
+
+Entrada: 500
+Esperado: 450
+
+Cenário 7: Exatamente 501 (Limite inferior 20% desconto)
+
+Entrada: 501
+Esperado: 400.8
+
+Cenário 8: Valor alto 20% desconto (Equivalência)
+
+Entrada: 1000
+Esperado: 800

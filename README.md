@@ -1,84 +1,149 @@
-# testes_unitarios_completo
-Todas as etapas da aula de testes unitários com IA.
+# Bootcamp QA: Fundamentos de Testes com Pytest
 
----
+Este repositório pratica testes de caixa preta com o framework Pytest em Python.
+As técnicas principais são Análise de Valor Limite e Partição de Equivalência.
+O projeto mostra como a escrita de testes evolui ao longo do curso.
 
-## 📍 Branch `main` — Fundamentos (Fase 1)
+## Objetivo
 
-Esta branch é a **linha de desenvolvimento dos fundamentos**. Ela contém o
-ponto de partida da aula: uma única função, os cenários pensados de forma
-intuitiva e os testes na forma mais básica do Pytest. É mantida separada das
-demais branches (`desafio_final`, `chore/prune-tests`) de propósito — cada uma
-documenta uma fase do aprendizado, sem merge entre elas.
+O objetivo não é apenas escrever testes. O objetivo é evoluir na escrita deles.
+O curso começa com uma abordagem simples e repetitiva.
+Depois, aplica duas técnicas profissionais:
+
+- Data-Driven Testing com `@pytest.mark.parametrize`.
+- Injeção de Dependência com `@pytest.fixture`.
+
+## Estrutura do repositório
+
+- `src/tech/` guarda o código de produção.
+- `src/tests/` guarda os testes automatizados.
+- `src/tests/cenários/` guarda os documentos de análise.
+- `pytest.ini` define `pythonpath = src` e `testpaths = src/tests`.
+
+## Roteiro de branches
+
+O repositório tem três branches. Cada branch guarda uma fase do curso.
+
+| Branch | Conteúdo |
+|---|---|
+| `main` | Fundamentos: função inicial, cenários intuitivos e testes básicos. |
+| `desafio_final` | Valor Limite, Partição de Equivalência, `parametrize` e fixtures. |
+| `chore/prune-tests` | Atividades de saque e transferência, e auditoria `prune-tests`. |
+
+Use `git checkout <nome-da-branch>` para trocar de branch.
+
+## Fase 1: Fundamentos
 
 ### O que foi feito
 
 | Arquivo | Papel |
 |---|---|
-| `src/tech/angelofdiasg/qabank/operacoes/validador_conta.py` | Função sob teste: `validar_abertura_conta(idade, score_credito)` |
-| `src/tests/cenários/cenarios_iniciais.txt` | Cenários escritos **antes** do código de teste (análise) |
-| `src/tests/test_validador.py` | 4 testes, um por cenário, com repetição de código |
-| `pytest.ini` | Configuração: `pythonpath = src` e `testpaths = src/tests` |
+| `src/tech/angelofdiasg/qabank/operacoes/validador_conta.py` | Função `validar_abertura_conta(idade, score_credito)`. |
+| `src/tests/cenários/cenarios_iniciais.txt` | Cenários pensados antes do código de teste. |
+| `src/tests/tests_validador_conta/test_validador.py` | Quatro testes, um por cenário. |
+| `pytest.ini` | Configuração do Pytest. |
 
-### Regra de negócio praticada
+### Regra de negócio
 
-`validar_abertura_conta(idade, score_credito)`:
+`validar_abertura_conta(idade, score_credito)` aplica três regras:
 
-1. `idade < 18` → lança `ValueError("Menor de idade não permitido")`
-2. `score_credito <= 500` → retorna `"Recusado"`
-3. caso contrário → retorna `"Aprovado"`
+1. Se `idade < 18`, lança `ValueError("Menor de idade não permitido")`.
+2. Se `score_credito <= 500`, retorna `"Recusado"`.
+3. Nos outros casos, retorna `"Aprovado"`.
 
-A ordem importa: a validação de idade acontece **antes** da checagem do score,
-por isso um menor de idade com score alto ainda gera exceção (e não
-`"Aprovado"`).
+A validação de idade roda antes da checagem do score.
+Por isso, um menor de idade com score alto ainda gera erro.
 
 ### Conceitos aplicados
 
-**1. Teste de Caixa Preta — análise antes da automação**
-O fluxo é sempre o mesmo: primeiro os **cenários** no `.txt`
-(`cenarios_iniciais.txt`), depois o código de teste. O aluno pensa em
-*entradas* e *resultados esperados* sem olhar a implementação — só o contrato.
+**Caixa preta.** Escreva os cenários antes dos testes. Cada cenário define entrada e resultado esperado, sem consultar a implementação.
 
-**2. Caminho Feliz (Happy Path)**
-Cenário 1 (idade 25, score 800 → `Aprovado`) exercita o único caminho em que
-nenhuma regra rejeita. É a base: sem ele, nada está funcionando de verdade.
+**Caminho feliz.** O primeiro cenário exercita o caminho em que nenhuma regra rejeita a entrada.
 
-**3. Partições de Equivalência (rascunho intuitivo)**
-Os 4 cenários cobrem as classes de entrada óbvias para um iniciante:
-- idade válida + score alto → aprovado
-- idade válida + score baixo → recusado
-- idade inválida (com score alto) → exceção
-- idade inválida + score baixo → exceção
+**Partição de equivalência.** Os quatro cenários cobrem quatro classes de entrada. A primeira combina idade válida com score alto. A segunda combina idade válida com score baixo. A terceira combina idade inválida com score alto. A quarta combina idade inválida com score baixo.
 
-É a versão "ingênua" da técnica: as partições estão certas, mas os **valores
-de limite** (18 e 500 exatos) ainda não foram testados — isso é o próximo
-passo do aprendizado (Análise de Valor Limite, nas branches seguintes).
+Essa versão ainda não testa os limites exatos `18` e `500`. A Análise de Valor Limite cobre isso na fase seguinte.
 
-**4. Tratamento de exceção com `pytest.raises`**
+**Exceção com `pytest.raises`.** O exemplo abaixo valida duas coisas: a classe da exceção e a mensagem.
+
 ```python
 with pytest.raises(ValueError, match="Menor de idade não permitido"):
     validar_abertura_conta(idade=15, score_credito=900)
 ```
-`pytest.raises` valida **duas** coisas: que a exceção certa foi lançada e que
-a mensagem (`match`, substring) corresponde ao contrato. Um teste que apenas
-"espera qualquer erro" é fraco; a mensagem é parte do comportamento visível
-ao chamador.
 
-**5. Um teste por cenário (abordagem repetitiva)**
-Cada cenário vira uma função `test_*` independente, com nome descritivo e
-docstring explicando a intenção. É propositalmente verbosa: esta é a
-**Fase 1**, feita para depois refatorar com `@pytest.mark.parametrize`
-(Data-Driven Testing) e `@pytest.fixture` (Injeção de Dependência) nas
-branches `feat/parametrize` e `feat/fixtures`.
+A mensagem faz parte do contrato. Um teste que aceita qualquer erro não detecta mudança de mensagem.
 
-**6. Estrutura de pastas e configuração**
-- `pytest.ini` com `pythonpath = src` evita `sys.path` manual: os testes
-  importam `from tech.angelofdiasg...` direto.
-- `testpaths = src/tests` permite rodar simplesmente `python -m pytest`.
-- Cada suíte em sua pasta (`src/tests/`), mantendo testes separados da
-  produção (`src/tech/`).
+**Um teste por cenário.** Cada cenário vira uma função `test_*` separada. A repetição é proposital. É o ponto de partida que as próximas fases refatoram.
 
-### Como executar
+## Atividades guiadas
+
+### Desconto (`calcular_desconto`)
+
+A função aplica três faixas: até `100` sem desconto, de `101` a `500` com `10%` e acima de `500` com `20%`. Valores negativos geram `ValueError`.
+
+Os oito cenários cobrem as quatro partições e as fronteiras `100/101` e `500/501`. Os testes existem em três formas, para comparação: direta, com `parametrize` e com fixtures.
+
+### Saque (`validar_saque`)
+
+A função valida um pedido de saque em quatro etapas, nesta ordem: tipo de conta, valor positivo, saldo e limite diário. O limite diário é `2000` para conta corrente e `1000` para conta poupança. A estrutura ausente gera `ValueError`.
+
+A ordem das etapas importa. Ela define qual motivo de recusa aparece quando mais de uma regra falha.
+
+### Transferência (`validar_transferencia`)
+
+A função valida sete regras. Os limites são `1000` para conta corrente e `500` para conta poupança. Origem e destino precisam de números diferentes.
+
+## Revisão com a skill `prune-tests`
+
+A skill `prune-tests` audita testes frágeis ou tautológicos. Ela está salva em `~/.config/opencode/skills/prune-tests/SKILL.md` e está disponível em outras sessões.
+
+### Audit e Cleanup
+
+- **Audit**: pedidos como revisar ou analisar. É somente leitura. O resultado é um relatório.
+- **Cleanup**: pedidos como podar ou reescrever. Autoriza as edições no escopo aprovado.
+
+O escopo fica fixo. A decisão é tomada por teste, nunca por arquivo.
+
+### A barra comportamental
+
+Um teste só sobrevive se cumprir os seis itens abaixo:
+
+1. Prova um comportamento exato vindo de um requisito aprovado.
+2. Detecta uma falha visível ao usuário ou ao chamador.
+3. Tem resultado esperado independente da implementação.
+4. Observa pelo contrato público.
+5. Sobrevive a refatores internos e a mudanças de texto ou layout.
+6. Usa a menor camada de teste que dá confiança, sem duplicar cobertura.
+
+Faltar um item leva ao conselho de remoção.
+
+### O que podar
+
+- **Tautologias**: o esperado é derivado do próprio cálculo de produção. O teste passa por construção.
+- **Change detectors**: falham quando o código muda, sem apontar comportamento errado. Exemplos: leitura de fonte, contagem de elementos e snapshots de estrutura.
+- **Geometria e aparência**: dimensões, estilos computados e contagem de linhas são evidência visual, não comportamento.
+- **Texto**: asserção de frase exata só quando a palavra em si é requisito.
+- **Foco e desabilitado**: mantenha só quando o estado é o contrato de interação.
+
+### Disposições
+
+| Disposição | Quando |
+|---|---|
+| `DELETE` | Viola a política e nenhum comportamento fica desprotegido. É o padrão. |
+| `REWRITE` | O teste é inaceitável, mas contém comportamento que passa na barra. É exceção. |
+| `KEEP` | Suspeito, mas prova comportamento aceitável e passa na barra sem mudar. |
+
+`KEEP` e `REWRITE` exigem justificativa escrita para os seis itens da barra.
+
+### Resultado nesta branch
+
+Foram aplicados três `DELETE`, nenhum `REWRITE` e ficaram 32 casos `KEEP`. O código também perdeu um `import copy` sem uso.
+
+- Uma duplicata do `ValueError` de saque.
+- Um teste de isolamento de fixture que não exercitava a função pública.
+- Um teste de imutabilidade sem requisito que o aprovasse.
+
+## Como executar os testes
 
 Na raiz do projeto:
 
@@ -86,12 +151,9 @@ Na raiz do projeto:
 python -m pytest -v
 ```
 
-### Mapa das branches (linhas de desenvolvimento separadas)
+O `-v` mostra o nome de cada teste que passou ou falhou.
 
-| Branch | Fase |
-|---|---|
-| **`main`** (esta) | Fundamentos: cenários intuitivos + Pytest básico + `pytest.raises` |
-| `desafio_final` | Técnicas avançadas: Valor Limite/Partição, `parametrize`, fixtures |
-| `chore/prune-tests` | Atividades de saque/transferência + auditoria com a skill `prune-tests` |
+## Uso de IA na atividade
 
-Bom estudo e bons testes! 🐛🔨
+Durante a aula, explore como usar IA para gerar a estrutura dos arquivos Pytest.
+O foco do QA é pensar nos cenários. A automação pode ser acelerada com prompts assertivos.

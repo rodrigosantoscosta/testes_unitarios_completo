@@ -1,0 +1,83 @@
+DESAFIO EXTRA - VALIDAÇÃO DE TRANSFERÊNCIA BANCÁRIA
+
+Objetivo
+--------
+Implementar e testar uma validação de transferência bancária usando os
+cenários abaixo. Este ficheiro contém os requisitos, não contém a solução.
+
+Contrato da função
+------------------
+Crie a função validar_transferencia(transferencia) no módulo:
+src/tech/angelofdiasg/qabank/operacoes/validar_transferencia.py
+
+A entrada é um dicionário com esta estrutura:
+
+{
+    "valor": 250,
+    "conta_origem": {
+        "numero": "12345",
+        "tipo": "corrente",
+        "saldo": 1200
+    },
+    "conta_destino": {
+        "numero": "67890"
+    }
+}
+
+Regras
+------
+1. A estrutura deve conter os campos apresentados. Se a entrada não for um
+   dicionário, ou se faltar algum campo ou subcampo obrigatório, lance
+   ValueError com a mensagem "Dados da transferência inválidos".
+2. Os tipos de conta aceites são "corrente" e "poupanca". Para outro tipo,
+   recuse a transferência com o motivo "Tipo de conta inválido".
+3. A conta de origem e a conta de destino não podem ter o mesmo número.
+   Motivo: "Contas de origem e destino devem ser diferentes".
+4. O valor da transferência deve ser maior que zero. Motivo:
+   "Valor da transferência deve ser maior que zero".
+5. O saldo da conta de origem deve ser suficiente para cobrir o valor.
+   Motivo: "Saldo insuficiente".
+6. O limite por transferência é de 1000 para conta "corrente" e 500 para
+   conta "poupanca". O valor igual ao limite é permitido. Acima dele, recuse
+   com o motivo "Limite de transferência excedido".
+7. Quando todas as regras forem satisfeitas, aprove a transferência.
+
+Para recusas de negócio, devolva um dicionário com as chaves "status" e
+"motivo", usando o status "Recusada". Para uma transferência aprovada,
+devolva as mesmas chaves, com status "Aprovada" e motivo
+"Transferência autorizada".
+
+Cenários para testar
+--------------------
+1. Transferência válida de conta corrente: valor 250, saldo 1200 e números de
+   conta diferentes. Esperado: Aprovada.
+2. Conta corrente exatamente no limite: valor 1000 e saldo suficiente.
+   Esperado: Aprovada.
+3. Conta corrente acima do limite: valor 1001 e saldo suficiente.
+   Esperado: Recusada por limite excedido.
+4. Conta poupança exatamente no limite: valor 500 e saldo suficiente.
+   Esperado: Aprovada.
+5. Conta poupança acima do limite: valor 501 e saldo suficiente.
+   Esperado: Recusada por limite excedido.
+6. Valor zero e valor negativo. Esperado: Recusada por valor inválido.
+7. Saldo inferior ao valor da transferência. Esperado: Recusada por saldo
+   insuficiente.
+8. Número da conta de origem igual ao da conta de destino. Esperado: Recusada
+   por contas iguais.
+9. Tipo de conta não aceite. Esperado: Recusada por tipo inválido.
+10. Entrada None e payload sem campo obrigatório. Esperado: ValueError com a
+    mensagem definida no contrato.
+
+Entregáveis
+-----------
+- A implementação da função no módulo indicado.
+- Testes com pytest para os cenários acima.
+- Use parametrize para agrupar casos com a mesma regra, especialmente os
+  valores de limite e os valores inválidos.
+- Use uma fixture para fornecer uma transferência válida reutilizável e
+  derive dela os casos que alteram apenas um dado.
+- Garanta que a alteração de dados num teste não afete a fixture recebida por
+  outros testes.
+
+Não altere os módulos existentes. Crie os testes numa pasta própria dentro de
+src/tests e confirme que a suíte completa continua a passar.

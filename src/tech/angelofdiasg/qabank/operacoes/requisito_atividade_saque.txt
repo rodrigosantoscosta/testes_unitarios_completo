@@ -1,0 +1,64 @@
+ATIVIDADE GUIADA - IMPLEMENTAÇÃO E TESTES DE SAQUE
+
+Contexto
+--------
+O QABank precisa validar pedidos de saque antes de autorizar a operação.
+Implemente a função validar_saque(saque) no módulo:
+src/tech/angelofdiasg/qabank/operacoes/validar_saque.py
+
+Requisito
+---------
+A função recebe um dicionário com o valor do saque e os dados da conta:
+
+{
+    "valor": 300,
+    "conta": {
+        "tipo": "corrente",
+        "saldo": 1200,
+        "total_sacado_hoje": 400
+    }
+}
+
+Critérios de aceite
+-------------------
+1. A entrada deve ser um dicionário com "valor" e "conta". A conta deve ser
+   um dicionário com "tipo", "saldo" e "total_sacado_hoje". Se a estrutura
+   estiver ausente ou incompleta, lance ValueError com a mensagem
+   "Dados do saque inválidos".
+2. Os únicos tipos de conta aceites são "corrente" e "poupanca". Qualquer
+   outro tipo deve ser recusado com o motivo "Tipo de conta inválido".
+3. O valor do saque deve ser maior que zero. Caso contrário, recuse com o
+   motivo "Valor do saque deve ser maior que zero".
+4. O saldo deve ser suficiente para cobrir o valor do saque. Caso contrário,
+   recuse com o motivo "Saldo insuficiente".
+5. O limite diário total, incluindo o saque solicitado, é 2000 para uma conta
+   "corrente" e 1000 para uma conta "poupanca". O total igual ao limite é
+   permitido. Se o saque ultrapassar o limite, recuse com o motivo
+   "Limite diário de saque excedido".
+6. A validação das regras de negócio deve seguir esta ordem: tipo de conta,
+   valor positivo, saldo suficiente e limite diário.
+7. Em caso de aprovação, devolva um dicionário com:
+   - "status": "Aprovado"
+   - "motivo": "Saque autorizado"
+   - "saldo_restante": saldo atual menos o valor do saque
+8. Em caso de recusa por regra de negócio, devolva um dicionário com:
+   - "status": "Recusado"
+   - "motivo": a mensagem correspondente ao critério violado
+   - "saldo_restante": o saldo atual, sem o alterar
+9. A função não deve alterar o dicionário recebido.
+
+Etapas da atividade
+-------------------
+1. Implemente a função para cumprir os critérios de aceite.
+2. Antes de completar os testes, analise os critérios e registe os cenários
+   em cenarios_atividade_saque.txt. Inclua caminho feliz, limites, partições
+   inválidas e prioridade entre regras.
+3. Complete os testes iniciais em
+   src/tests/tests_validar_saque/test_validar_saque.py. Acrescente os casos
+   encontrados na análise e remova os marcadores de skip quando os testes
+   estiverem prontos.
+4. Execute python -m pytest -v e confirme que toda a suíte passa.
+
+Não consulte nem crie um gabarito nesta atividade. Os exemplos existentes no
+arquivo de testes são apenas pontos de partida; complete a cobertura a partir
+dos critérios de aceite.

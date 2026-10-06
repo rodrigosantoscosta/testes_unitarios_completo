@@ -1,0 +1,28 @@
+Cenários de Teste - Função validar_cliente_premium
+
+Focando no uso de Fixtures para gerir objetos complexos (Payloads)
+
+Cenário 1: Cliente Perfeito (Caminho Feliz)
+
+Dados: Cliente com 30 anos, morada completa, score 800 e renda 6000.
+Esperado: Aprovado
+
+Cenário 2: Cliente Menor de Idade
+
+Dados: Cliente com 17 anos (restante perfeito).
+Esperado: Recusado (Motivo: Idade inferior a 18 anos)
+
+Cenário 3: Cliente sem Código Postal (CEP)
+
+Dados: Cliente perfeito, mas com o campo 'cep' vazio na morada.
+Esperado: Recusado (Motivo: Código postal inválido)
+
+Cenário 4: Score de Crédito Baixo
+
+Dados: Cliente perfeito, mas com score de 699.
+Esperado: Recusado (Motivo: Score de crédito insuficiente)
+
+Cenário 5: Cliente Inválido/Vazio (Exceção)
+
+Dados: Passar 'None' ou um objeto vazio.
+Esperado: ValueError (Dados do cliente inválidos)
