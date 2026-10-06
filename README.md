@@ -1,158 +1,159 @@
-# 🧪 Bootcamp QA: Fundamentos de Testes com Pytest
+# Bootcamp QA: Fundamentos de Testes com Pytest
 
-Bem-vindos ao repositório prático do Bootcamp de Qualidade de Software!
-Neste projeto, vão aprender e aplicar técnicas de testes de Caixa Preta (como Análise de Valor Limite) e automatizar a vossa estratégia utilizando o framework **Pytest** em Python.
+Este repositório pratica testes de caixa preta com o framework Pytest em Python.
+As técnicas principais são Análise de Valor Limite e Partição de Equivalência.
+O projeto mostra como a escrita de testes evolui ao longo do curso.
 
----
+## Objetivo
 
-## 🎯 Objetivo do Projeto
-O objetivo não é apenas aprender a escrever testes, mas sim **como evoluir a escrita de testes**. 
-Começaremos com uma abordagem mais simples (e repetitiva) e evoluiremos para técnicas profissionais de automação utilizando **Data-Driven Testing (Parametrize)** e **Injeção de Dependência (Fixtures)**.
+O objetivo não é apenas escrever testes. O objetivo é evoluir na escrita deles.
+O curso começa com uma abordagem simples e repetitiva.
+Depois, aplica duas técnicas profissionais:
 
----
+- Data-Driven Testing com `@pytest.mark.parametrize`.
+- Injeção de Dependência com `@pytest.fixture`.
 
-## 🌳 Navegando pelas Branches (Roteiro de Aprendizagem)
+## Estrutura do repositório
 
-Este repositório está dividido em **branches** (ramificações). Cada branch representa uma fase diferente do nosso aprendizado. Podem mudar de branch utilizando o comando `git checkout <nome-da-branch>` ou através da interface do GitHub.
+- `src/tech/` guarda o código de produção.
+- `src/tests/` guarda os testes automatizados.
+- `src/tests/cenários/` guarda os documentos de análise.
+- `pytest.ini` define `pythonpath = src` e `testpaths = src/tests`.
 
-### 1️⃣ Branch: `main` (O Início)
-* **O que tem aqui:** A função inicial do desenvolvedor (`validador_conta.py`), os cenários de teste pensados de forma intuitiva, e a implementação de testes Pytest da forma mais básica (um teste para cada cenário, com repetição de código).
-* **O que aprender:** A sintaxe básica do Pytest e o uso do `pytest.raises` para capturar exceções.
+## Roteiro de branches
 
-### 2️⃣ Branch: `feat/parametrize` (Subindo de Nível)
-* **O que tem aqui:** Refatorámos os testes da branch `main` utilizando o poderoso decorador `@pytest.mark.parametrize`.
-* **O que aprender:** Data-Driven Testing. Como uma única função de teste pode executar múltiplos cenários de uma Tabela de Decisão, tornando o código incrivelmente limpo e fácil de manter.
+O repositório tem três branches. Cada branch guarda uma fase do curso.
 
-### 3️⃣ Branch: `feat/fixtures` (Injeção de Dados)
-* **O que tem aqui:** Uma demonstração de como utilizar o `@pytest.fixture`.
-* **O que aprender:** Como separar a "criação dos dados de teste" da "execução do teste". Entender como preparar ambientes (ou dados) e injetá-los automaticamente nos teus testes.
+| Branch | Conteúdo |
+|---|---|
+| `main` | Fundamentos: função inicial, cenários intuitivos e testes básicos. |
+| `desafio_final` | Valor Limite, Partição de Equivalência, `parametrize` e fixtures. |
+| `chore/prune-tests` | Atividades de saque e transferência, e auditoria `prune-tests`. |
 
-### 4️⃣ Branch: `feat/desafio-extra` (Modo Full-Stack)
-* **O que tem aqui:** A resolução do desafio da funcionalidade `calcular_desconto`.
-* **O que aprender:** Aplicação completa do que foi aprendido. Encontrarão a lógica de negócio implementada, os cenários baseados em Valor Limite/Partição de Equivalência, e os testes escritos das 3 formas diferentes (Direto, Parametrize e Fixtures) para efeitos de comparação.
+Use `git checkout <nome-da-branch>` para trocar de branch.
 
----
+## Fase 1: Fundamentos
 
-## 🧩 Desafio Extra para a Aula
+### O que foi feito
 
-Nesta branch, o ficheiro `src/tests/cenários/cenarios_desafio_aluno.txt`
-apresenta um novo exercício de validação de transferências bancárias. Ele
-define o contrato, as regras e os cenários, mas não inclui implementação nem
-testes de referência: a proposta é que vocês desenvolvam ambos, aplicando
-`@pytest.mark.parametrize` e fixtures.
+| Arquivo | Papel |
+|---|---|
+| `src/tech/angelofdiasg/qabank/operacoes/validador_conta.py` | Função `validar_abertura_conta(idade, score_credito)`. |
+| `src/tests/cenários/cenarios_iniciais.txt` | Cenários pensados antes do código de teste. |
+| `src/tests/tests_validador_conta/test_validador.py` | Quatro testes, um por cenário. |
+| `pytest.ini` | Configuração do Pytest. |
 
-Os exemplos de desconto e de validação de cliente premium continuam disponíveis
-como material de estudo; são independentes deste desafio.
+### Regra de negócio
 
-## 🛠️ Atividade Completa: Implementar e Testar
+`validar_abertura_conta(idade, score_credito)` aplica três regras:
 
-A atividade de saque está organizada em etapas para vocês seguirem:
+1. Se `idade < 18`, lança `ValueError("Menor de idade não permitido")`.
+2. Se `score_credito <= 500`, retorna `"Recusado"`.
+3. Nos outros casos, retorna `"Aprovado"`.
 
-1. Ler os requisitos e critérios de aceite em
-   `src/tech/angelofdiasg/qabank/operacoes/requisito_atividade_saque.txt`.
-2. Implementar a função inicial em
-   `src/tech/angelofdiasg/qabank/operacoes/validar_saque.py`.
-3. Escrever os cenários manualmente em
-   `src/tests/cenários/cenarios_atividade_saque.txt`.
-4. Completar os testes em
-   `src/tests/tests_validar_saque/test_validar_saque.py`, usando o
-   `parametrize` e a fixture já preparados. Os testes-esqueleto estão ignorados
-   até vocês removerem os marcadores de skip.
+A validação de idade roda antes da checagem do score.
+Por isso, um menor de idade com score alto ainda gera erro.
 
-## 🚀 Como Executar os Testes
+### Conceitos aplicados
 
-Para executar os testes em qualquer uma das branches, certifiquem-se de que estão na raiz do projeto e executem o seguinte comando no terminal:
+**Caixa preta.** Escreva os cenários antes dos testes. Cada cenário define entrada e resultado esperado, sem consultar a implementação.
 
-`python -m pytest -v`
+**Caminho feliz.** O primeiro cenário exercita o caminho em que nenhuma regra rejeita a entrada.
 
-* **Dica:** O `-v` (verbose) permite ver exatamente qual o teste que passou ou falhou detalhadamente!
+**Partição de equivalência.** Os quatro cenários cobrem quatro classes de entrada. A primeira combina idade válida com score alto. A segunda combina idade válida com score baixo. A terceira combina idade inválida com score alto. A quarta combina idade inválida com score baixo.
 
----
+Essa versão ainda não testa os limites exatos `18` e `500`. A Análise de Valor Limite cobre isso na fase seguinte.
 
-## 🤖 Uso da IA na Atividade
-Durante a aula, exploraremos como utilizar a Inteligência Artificial (Copilot/ChatGPT/Gemini) para gerar a estrutura destes ficheiros Pytest rapidamente. O foco do QA é **pensar nos cenários (Análise)**; a codificação (Automação) pode ser agilizada com o uso de Prompts assertivos!
+**Exceção com `pytest.raises`.** O exemplo abaixo valida duas coisas: a classe da exceção e a mensagem.
 
-Bom estudo e bons testes! 🐛🔨
+```python
+with pytest.raises(ValueError, match="Menor de idade não permitido"):
+    validar_abertura_conta(idade=15, score_credito=900)
+```
 
----
+A mensagem faz parte do contrato. Um teste que aceita qualquer erro não detecta mudança de mensagem.
 
-## 🔍 Revisão com a Skill `prune-tests`
+**Um teste por cenário.** Cada cenário vira uma função `test_*` separada. A repetição é proposital. É o ponto de partida que as próximas fases refatoram.
 
-Esta branch (`chore/prune-tests`) aplica a skill **`prune-tests`** (salva em
-`~/.config/opencode/skills/prune-tests/SKILL.md`) para auditar e limpar testes
-frágeis ou tautológicos. Abaixo, os conceitos que ela ensina.
+## Atividades guiadas
 
-### Modo de operação: Audit vs Cleanup
+### Desconto (`calcular_desconto`)
 
-A skill separa **o que pedem** de **o que se faz**:
+A função aplica três faixas: até `100` sem desconto, de `101` a `500` com `10%` e acima de `500` com `20%`. Valores negativos geram `ValueError`.
 
-* **Audit** (pedidos como *revisar*, *analisar*, *encontrar*): é somente
-  leitura. O resultado é um relatório de disposições — nada é apagado.
-* **Cleanup** (pedidos como *podar*, *apagar*, *reescrever*): autoriza as
-  edições no escopo aprovado. Invocar a skill sozinha **não** converte uma
-  auditoria em limpeza.
+Os oito cenários cobrem as quatro partições e as fronteiras `100/101` e `500/501`. Os testes existem em três formas, para comparação: direta, com `parametrize` e com fixtures.
 
-O **escopo** fica fixo (um diff, um PR, uma pasta, a suíte inteira) e toda
-decisão é tomada **por teste**, nunca por arquivo. Um arquivo só sai depois
-que todos os seus testes têm disposição.
+### Saque (`validar_saque`)
 
-### A barra comportamental (6 critérios)
+A função valida um pedido de saque em quatro etapas, nesta ordem: tipo de conta, valor positivo, saldo e limite diário. O limite diário é `2000` para conta corrente e `1000` para conta poupança. A estrutura ausente gera `ValueError`.
 
-Um teste só sobrevive se passar nos 6 itens — falhar em 1 = recomendar `DELETE`:
+A ordem das etapas importa. Ela define qual motivo de recusa aparece quando mais de uma regra falha.
 
-1. Prova um comportamento exato vindo de **requisito aprovado**, bug, regra ou
-   exemplo trabalhado (**fonte independente**).
-2. Detecta uma falha **visível ao usuário ou ao chamador**.
-3. O resultado esperado é **independente da implementação**.
-4. Observa pelo **contrato público** (interface estável).
-5. Sobrevive a **refatores internos** e mudanças de copy/layout incidental.
-6. Usa o **menor seam estável** que dá confiança, sem duplicar cobertura
-   próxima (domain → application → component → E2E, na camada certa).
+### Transferência (`validar_transferencia`)
 
-### O que a skill manda podar
+A função valida sete regras. Os limites são `1000` para conta corrente e `500` para conta poupança. Origem e destino precisam de números diferentes.
 
-* **Tautologias** — o esperado é derivado do próprio cálculo de produção
-  (ex.: `assert total == valor * 1.1` se a função faz a mesma conta). Passa
-  por construção; o esperado precisa poder discordar da implementação.
-* **Change detectors** — falham quando o *código* muda, sem apontar
-  comportamento errado: scans de fonte (`grep "import x"`), contagens de
-  elementos/exports, snapshots de markup/estrutura, asserções sobre
-  colaboradores privados, duplicatas cujo único valor é notar mudança.
-* **Geometria e aparência** — dimensões, ratios, estilos computados, contagem
-  de linhas montadas são evidência visual, não comportamento. Screenshot só
-  entra se o projeto adotou regressão visual como requisito.
-* **Copy (texto)** — asserção de prosa exata só quando a palavra em si é
-  requisito; caso contrário, valide papel, estado, navegação ou *reason code*.
-* **Focus/disabled** — mantenha só quando o estado **é** o contrato de
-  interação (foco no primeiro campo inválido, Save habilitado após edição).
+## Revisão com a skill `prune-tests`
+
+A skill `prune-tests` audita testes frágeis ou tautológicos. Ela está salva em `~/.config/opencode/skills/prune-tests/SKILL.md` e está disponível em outras sessões.
+
+### Audit e Cleanup
+
+- **Audit**: pedidos como revisar ou analisar. É somente leitura. O resultado é um relatório.
+- **Cleanup**: pedidos como podar ou reescrever. Autoriza as edições no escopo aprovado.
+
+O escopo fica fixo. A decisão é tomada por teste, nunca por arquivo.
+
+### A barra comportamental
+
+Um teste só sobrevive se cumprir os seis itens abaixo:
+
+1. Prova um comportamento exato vindo de um requisito aprovado.
+2. Detecta uma falha visível ao usuário ou ao chamador.
+3. Tem resultado esperado independente da implementação.
+4. Observa pelo contrato público.
+5. Sobrevive a refatores internos e a mudanças de texto ou layout.
+6. Usa a menor camada de teste que dá confiança, sem duplicar cobertura.
+
+Faltar um item leva ao conselho de remoção.
+
+### O que podar
+
+- **Tautologias**: o esperado é derivado do próprio cálculo de produção. O teste passa por construção.
+- **Change detectors**: falham quando o código muda, sem apontar comportamento errado. Exemplos: leitura de fonte, contagem de elementos e snapshots de estrutura.
+- **Geometria e aparência**: dimensões, estilos computados e contagem de linhas são evidência visual, não comportamento.
+- **Texto**: asserção de frase exata só quando a palavra em si é requisito.
+- **Foco e desabilitado**: mantenha só quando o estado é o contrato de interação.
 
 ### Disposições
 
 | Disposição | Quando |
 |---|---|
-| `DELETE` | Viola a política e nenhum comportamento fica desprotegido. **É o padrão.** |
-| `REWRITE` | O teste é inaceitável, mas contém comportamento que passa na barra com justificativa forte. Exceção, não meio-termo. |
+| `DELETE` | Viola a política e nenhum comportamento fica desprotegido. É o padrão. |
+| `REWRITE` | O teste é inaceitável, mas contém comportamento que passa na barra. É exceção. |
 | `KEEP` | Suspeito, mas prova comportamento aceitável e passa na barra sem mudar. |
 
-`KEEP` e `REWRITE` exigem **justificativa escrita para os 6 itens** da barra.
-Faltando qualquer um, o conselho vira `DELETE`. Ao reescrever, guarda-se
-apenas setup/ação/asserções necessárias — não se preserva o tamanho, número
-de asserções ou formato do teste antigo.
-
-### Validação e relatório
-
-No cleanup: rodar o menor comando de teste primeiro e depois toda a
-validação do repositório; limpar suporte morto (imports, fixtures, helpers);
-nunca mudar produção só para preservar um teste; inspecionar o diff final.
-O relatório lista `DELETE`/`REWRITE`/`KEEP` com caminho e motivo, a
-justificativa completa dos sobreviventes, os comandos executados e qualquer
-conflito de política — e declara explicitamente quando não existiu rewrite
-aceitável.
+`KEEP` e `REWRITE` exigem justificativa escrita para os seis itens da barra.
 
 ### Resultado nesta branch
 
-3 `DELETE` aplicados (duplicata do `ValueError` de saque, teste de isolamento
-de fixture que não exercitava a função pública e teste de imutabilidade sem
-requisito que o aprovasse), `REWRITE` nenhum, 32 casos `KEEP`, suporte morto
-removido (`import copy` órfão) e suíte validada: **74 passed** (−3, exatos
-nos removidos).
+Foram aplicados três `DELETE`, nenhum `REWRITE` e ficaram 32 casos `KEEP`. O código também perdeu um `import copy` sem uso.
+
+- Uma duplicata do `ValueError` de saque.
+- Um teste de isolamento de fixture que não exercitava a função pública.
+- Um teste de imutabilidade sem requisito que o aprovasse.
+
+## Como executar os testes
+
+Na raiz do projeto:
+
+```
+python -m pytest -v
+```
+
+O `-v` mostra o nome de cada teste que passou ou falhou.
+
+## Uso de IA na atividade
+
+Durante a aula, explore como usar IA para gerar a estrutura dos arquivos Pytest.
+O foco do QA é pensar nos cenários. A automação pode ser acelerada com prompts assertivos.
